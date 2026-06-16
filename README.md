@@ -9,7 +9,7 @@ A modern, fast, and feature-rich Neovim configuration built with Lua, leveraging
 To ensure all plugins function perfectly, make sure you have the following system-level tools installed:
 
 ### 1. Core Requirements
-*   **Neovim v0.9.0+** (v0.10.0+ highly recommended)
+*   **Neovim v0.12.0+** (Highly recommended. Neovim v0.12+ includes **built-in Tree-sitter** support for core languages, providing high-performance, out-of-the-box syntax highlighting without needing external treesitter plugins).
 *   **Git** (needed for Lazy.nvim and plugin updates)
 *   **Nerd Font** (highly recommended for file/folder icons). Make sure to set your terminal font to a Nerd Font (e.g., *FiraCode Nerd Font*, *JetBrainsMono Nerd Font*).
 
@@ -31,10 +31,19 @@ Required for the `<leader>y` and `<leader>Y` system clipboard copy bindings:
     *   `sudo apt install wl-clipboard`
 
 ### 4. Language & Formatter Runtimes
-Required for Mason to install LSPs, formatters, and linters:
-*   **Node.js & npm/pnpm/yarn**: Required for GitHub Copilot (`copilot.lua`), TypeScript LSP (`ts_ls`), and Web-related tooling.
+Required for LSPs, formatters, and linters:
+*   **Node.js & npm/pnpm/yarn**: Required for GitHub Copilot (`copilot.lua`), TypeScript LSP (`ts_ls`), and Web-related formatting/tooling (like `prettier`/`prettierd`).
 *   **Python 3 & pip/venv**: Required for Python LSP (`pylsp`) and formatting tools like `black` or `isort`.
+*   **Lua / StyLua**: Required for Lua file formatting (`conform.nvim`). Can be installed via package managers (e.g., `brew install stylua`, `cargo install stylua`).
 *   **Ollama**: Required if you wish to run CodeCompanion's local AI features (defaults to local Qwen). Ensure Ollama is running locally.
+
+> [!TIP]
+> **Installing Formatters and LSPs via Mason:**
+> You can easily install, update, and manage your LSPs, linters, and formatters directly within Neovim. Open Neovim and run:
+> ```vim
+> :Mason
+> ```
+> Use the interactive interface to search for formatters like `stylua`, `black`, `isort`, `prettierd`, or `prettier`, and press `i` to install them.
 
 ---
 
@@ -60,7 +69,7 @@ Your plugins are organized modularly under `lua/plugins/`. Here is what each fil
 
 ### 🤖 AI Assist (`lua/plugins/ai.lua`)
 *   **[copilot.lua](https://github.com/zbirenbaum/copilot.lua)**: Fast inline code completions via GitHub Copilot (ghost text).
-*   **[codecompanion.nvim](https://github.com/olimorris/codecompanion.nvim)**: Fully-featured sidebar chat and inline code refactoring, configured to route through your local **Ollama** server.
+*   **[codecompanion.nvim](https://github.com/olimorris/codecompanion.nvim)**: Fully-featured sidebar chat and inline code refactoring. Configurable via adapters to use local LLMs (via **Ollama**) or cloud LLMs (via **Google Gemini**).
 
 ### 🗂️ File Explorer (`lua/plugins/explorer.lua`)
 *   **[neo-tree.nvim](https://github.com/nvim-neo-tree/neo-tree.nvim)**: A modern sidebar directory explorer supporting file icons, nested git status displays, and auto-focusing on your active file.
@@ -88,6 +97,113 @@ Your plugins are organized modularly under `lua/plugins/`. Here is what each fil
 *   **[vim-fugitive](https://github.com/tpope/vim-fugitive)**: The premier git wrapper allowing you to run git commands natively within Neovim.
 *   **[git-blame.nvim](https://github.com/f-person/git-blame.nvim)**: Displays inline virtual-text git blames for the current line.
 *   **[gitsigns.nvim](https://github.com/lewis6991/gitsigns.nvim)**: Renders indicators in the editor gutter highlighting added, modified, or deleted lines.
+
+---
+
+## 🤖 AI Model Injection & Customization
+
+CodeCompanion allows you to configure, extend, and inject different AI models by leveraging **adapters**. By default, this configuration is set up to interface with a local Ollama instance running `qwen2.5-coder`. 
+
+You can easily customize `lua/plugins/ai.lua` to inject other models (like Google Gemini) or configure dynamic fallbacks.
+
+### 1. Configuration: Google Gemini Injection
+To use Google Gemini, ensure you have set your `GEMINI_API_KEY` environment variable. You can then inject the Gemini adapter by extending `codecompanion` in `lua/plugins/ai.lua` as follows:
+
+```lua
+require("codecompanion").setup({
+  strategies = {
+    chat = {
+      adapter = "gemini", -- Route chat to Gemini
+    },
+    inline = {
+      adapter = "gemini", -- Route inline edits to Gemini
+    },
+  },
+  adapters = {
+    gemini = function()
+      return require("codecompanion.adapters").extend("gemini", {
+        schema = {
+          model = {
+            default = "gemini-1.5-flash", -- Choose your preferred Gemini model
+          },
+        },
+      })
+    end,
+  },
+})
+```
+
+### 2. Configuration: Local Ollama (Qwen Coder) Injection
+If you want to configure your local Ollama setup running `qwen2.5-coder`, use this configuration block:
+
+```lua
+require("codecompanion").setup({
+  strategies = {
+    chat = {
+      adapter = "ollama",
+    },
+    inline = {
+      adapter = "ollama",
+    },
+  },
+  adapters = {
+    ollama = function()
+      return require("codecompanion.adapters").extend("ollama", {
+        schema = {
+          model = {
+            default = "qwen2.5-coder", -- Specify your locally pulled model
+          },
+        },
+      })
+    end,
+  },
+})
+```
+
+### 3. Advanced Configuration: Dynamic Fallback Injection
+For a hybrid setup, you can inject logic that dynamically checks if the `GEMINI_API_KEY` environment variable is available. If it is present, it will automatically use Gemini; otherwise, it falls back to Ollama:
+
+```lua
+local default_adapter = "ollama"
+if os.getenv("GEMINI_API_KEY") then
+  default_adapter = "gemini"
+end
+
+require("codecompanion").setup({
+  strategies = {
+    chat = {
+      adapter = default_adapter,
+    },
+    inline = {
+      adapter = default_adapter,
+    },
+  },
+  adapters = {
+    ollama = function()
+      return require("codecompanion.adapters").extend("ollama", {
+        schema = {
+          model = {
+            default = "qwen2.5-coder",
+          },
+        },
+      })
+    end,
+    gemini = function()
+      return require("codecompanion.adapters").extend("gemini", {
+        schema = {
+          model = {
+            default = "gemini-1.5-flash",
+          },
+        },
+      })
+    end,
+  },
+})
+```
+
+### 🔄 Switching Adapters at Runtime
+When using CodeCompanion, you can also switch adapters on the fly:
+*   Inside the chat buffer, run the command `:CodeCompanionChat` followed by the adapter parameter, or edit the settings header at the top of the chat buffer to select different configured adapters.
 
 ---
 
