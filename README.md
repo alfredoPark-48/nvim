@@ -35,7 +35,7 @@ Required for LSPs, formatters, and linters:
 *   **Node.js & npm/pnpm/yarn**: Required for GitHub Copilot (`copilot.lua`), TypeScript LSP (`ts_ls`), and Web-related formatting/tooling (like `prettier`/`prettierd`).
 *   **Python 3 & pip/venv**: Required for Python LSP (`pylsp`) and formatting tools like `black` or `isort`.
 *   **Lua / StyLua**: Required for Lua file formatting (`conform.nvim`). Can be installed via package managers (e.g., `brew install stylua`, `cargo install stylua`).
-*   **Ollama**: Required if you wish to run CodeCompanion's local AI features (defaults to local Qwen). Ensure Ollama is running locally.
+*   **OpenCode CLI**: Required to run OpenCode AI agent. Ensure the backend is available.
 
 > [!TIP]
 > **Installing Formatters and LSPs via Mason:**
@@ -43,7 +43,7 @@ Required for LSPs, formatters, and linters:
 > ```vim
 > :Mason
 > ```
-> Use the interactive interface to search for formatters like `stylua`, `black`, `isort`, `prettierd`, or `prettier`, and press `i` to install them.
+> Use the interactive interface to search for formatters like `stylua`, `black`, `isort`, `prettierd`, `prettier`, `goimports`, `gofumpt`, `rustfmt`, or `google-java-format`, and press `i` to install them.
 
 ---
 
@@ -69,7 +69,7 @@ Your plugins are organized modularly under `lua/plugins/`. Here is what each fil
 
 ### 🤖 AI Assist (`lua/plugins/ai.lua`)
 *   **[copilot.lua](https://github.com/zbirenbaum/copilot.lua)**: Fast inline code completions via GitHub Copilot (ghost text).
-*   **[codecompanion.nvim](https://github.com/olimorris/codecompanion.nvim)**: Fully-featured sidebar chat and inline code refactoring. Configurable via adapters to use local LLMs (via **Ollama**) or cloud LLMs (via **Google Gemini**).
+*   **[opencode.nvim](https://github.com/sudo-tee/opencode.nvim)**: Context-aware AI coding agent directly in your editor.
 
 ### 🗂️ File Explorer (`lua/plugins/explorer.lua`)
 *   **[neo-tree.nvim](https://github.com/nvim-neo-tree/neo-tree.nvim)**: A modern sidebar directory explorer supporting file icons, nested git status displays, and auto-focusing on your active file.
@@ -84,13 +84,14 @@ Your plugins are organized modularly under `lua/plugins/`. Here is what each fil
 
 ### 💻 IDE & Coding features (`lua/plugins/lsp.lua`, `lua/plugins/utilities.lua`, `lua/plugins/editing.lua`)
 *   **[nvim-lspconfig](https://github.com/neovim/nvim-lspconfig)**: Native LSP configuration manager.
-*   **[mason.nvim](https://github.com/williamboman/mason.nvim)** & **[mason-lspconfig.nvim](https://github.com/williamboman/mason-lspconfig.nvim)**: Automatic installation of language servers (`lua_ls`, `ts_ls`, `pylsp`, `html`).
+*   **[mason.nvim](https://github.com/williamboman/mason.nvim)**, **[mason-lspconfig.nvim](https://github.com/williamboman/mason-lspconfig.nvim)** & **[mason-tool-installer.nvim](https://github.com/WhoIsSethDaniel/mason-tool-installer.nvim)**: Automatic installation of language servers (`lua_ls`, `ts_ls`, `pylsp`, `html`, `gopls`, `rust_analyzer`, `jdtls`) and external formatters (`stylua`, `isort`, `black`, `prettierd`, `prettier`, `goimports`, `gofumpt`, `google-java-format`).
 *   **[nvim-cmp](https://github.com/hrsh7th/nvim-cmp)**: The completion engine supporting LSP completions, local buffer matching, path completions, and snippets.
 *   **[LuaSnip](https://github.com/L3MON4D3/LuaSnip)**: Lightweight snippet execution engine.
-*   **[conform.nvim](https://github.com/stevearc/conform.nvim)**: Code auto-formatter triggering on file save. Supports `stylua` for Lua, `black`/`isort` for Python, and `prettier`/`prettierd` for JS/TS.
+*   **[conform.nvim](https://github.com/stevearc/conform.nvim)**: Code auto-formatter triggering on file save. Supports `stylua` for Lua, `black`/`isort` for Python, `prettier`/`prettierd` for JS/TS, `goimports`/`gofumpt` for Go, `rustfmt` for Rust, and `google-java-format` for Java.
 *   **[trouble.nvim](https://github.com/folke/trouble.nvim)**: Prettified summary lists for compilation errors, LSP diagnostics, and quickfix lists.
 *   **[nvim-autopairs](https://github.com/windwp/nvim-autopairs)**: Automatically inserts closing brackets, quotes, and braces.
 *   **[Comment.nvim](https://github.com/numToStr/Comment.nvim)**: Modern commenting support.
+*   **Native Tree-sitter Auto-Attach**: Automatically triggers `vim.treesitter.start()` plus Tree-sitter folding and indentation when opening Java, Python, Go, Rust, and other supported buffers.
 *   **[markdown-preview.nvim](https://github.com/iamcco/markdown-preview.nvim)**: Renders live markdown pages in your browser.
 
 ### 🐙 Git Integration (`lua/plugins/git.lua`)
@@ -102,109 +103,14 @@ Your plugins are organized modularly under `lua/plugins/`. Here is what each fil
 
 ## 🤖 AI Model Injection & Customization
 
-CodeCompanion allows you to configure, extend, and inject different AI models by leveraging **adapters**. By default, this configuration is set up to interface with a local Ollama instance running `qwen2.5-coder`. 
+OpenCode provides an AI agent directly into your editor, interacting seamlessly with context, buffers, diagnostics, and visual selections.
 
-You can easily customize `lua/plugins/ai.lua` to inject other models (like Google Gemini) or configure dynamic fallbacks.
-
-### 1. Configuration: Google Gemini Injection
-To use Google Gemini, ensure you have set your `GEMINI_API_KEY` environment variable. You can then inject the Gemini adapter by extending `codecompanion` in `lua/plugins/ai.lua` as follows:
+### Configuration
+By default, this configuration uses `sudo-tee/opencode.nvim`. Ensure you have the OpenCode CLI properly configured in your system.
 
 ```lua
-require("codecompanion").setup({
-  strategies = {
-    chat = {
-      adapter = "gemini", -- Route chat to Gemini
-    },
-    inline = {
-      adapter = "gemini", -- Route inline edits to Gemini
-    },
-  },
-  adapters = {
-    gemini = function()
-      return require("codecompanion.adapters").extend("gemini", {
-        schema = {
-          model = {
-            default = "gemini-1.5-flash", -- Choose your preferred Gemini model
-          },
-        },
-      })
-    end,
-  },
-})
+require("opencode").setup({})
 ```
-
-### 2. Configuration: Local Ollama (Qwen Coder) Injection
-If you want to configure your local Ollama setup running `qwen2.5-coder`, use this configuration block:
-
-```lua
-require("codecompanion").setup({
-  strategies = {
-    chat = {
-      adapter = "ollama",
-    },
-    inline = {
-      adapter = "ollama",
-    },
-  },
-  adapters = {
-    ollama = function()
-      return require("codecompanion.adapters").extend("ollama", {
-        schema = {
-          model = {
-            default = "qwen2.5-coder", -- Specify your locally pulled model
-          },
-        },
-      })
-    end,
-  },
-})
-```
-
-### 3. Advanced Configuration: Dynamic Fallback Injection
-For a hybrid setup, you can inject logic that dynamically checks if the `GEMINI_API_KEY` environment variable is available. If it is present, it will automatically use Gemini; otherwise, it falls back to Ollama:
-
-```lua
-local default_adapter = "ollama"
-if os.getenv("GEMINI_API_KEY") then
-  default_adapter = "gemini"
-end
-
-require("codecompanion").setup({
-  strategies = {
-    chat = {
-      adapter = default_adapter,
-    },
-    inline = {
-      adapter = default_adapter,
-    },
-  },
-  adapters = {
-    ollama = function()
-      return require("codecompanion.adapters").extend("ollama", {
-        schema = {
-          model = {
-            default = "qwen2.5-coder",
-          },
-        },
-      })
-    end,
-    gemini = function()
-      return require("codecompanion.adapters").extend("gemini", {
-        schema = {
-          model = {
-            default = "gemini-1.5-flash",
-          },
-        },
-      })
-    end,
-  },
-})
-```
-
-### 🔄 Switching Adapters at Runtime
-When using CodeCompanion, you can also switch adapters on the fly:
-*   Inside the chat buffer, run the command `:CodeCompanionChat` followed by the adapter parameter, or edit the settings header at the top of the chat buffer to select different configured adapters.
-
 ---
 
 ## ⌨️ Custom Keymaps Reference
@@ -264,7 +170,7 @@ Your Leader key is configured to `<Space>`.
 | `<leader>xx` | Normal | Toggle inline project diagnostics list |
 | `<leader>xq` | Normal | Toggle Neovim Quickfix list |
 
-### 🤖 AI (Copilot & CodeCompanion)
+### 🤖 AI (Copilot & OpenCode)
 | Keymap | Mode | Action |
 | :--- | :---: | :--- |
 | `<M-l>` *(Alt/Opt + L)* | Insert | Accept full Copilot suggestion |
@@ -273,9 +179,8 @@ Your Leader key is configured to `<Space>`.
 | `<M-]>` | Insert | Cycle to next Copilot suggestion |
 | `<M-[>` | Insert | Cycle to previous Copilot suggestion |
 | `<C-]>` | Insert | Dismiss Copilot suggestion |
-| `<leader>cc` | Normal / Visual | Toggle CodeCompanion chat panel |
-| `<leader>ca` | Normal / Visual | Open CodeCompanion prompt actions menu |
-| `<leader>ce` | Visual | Append visual selection to active CodeCompanion chat |
+| `<leader>oc` | Normal / Visual | Toggle OpenCode chat panel |
+| `<leader>oa` | Normal / Visual | Open OpenCode prompt actions menu |
 
 ### 📌 Harpoon File Pinning
 | Keymap | Mode | Action |

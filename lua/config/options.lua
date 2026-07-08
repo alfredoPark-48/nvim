@@ -7,7 +7,7 @@ vim.opt.number = true
 -- Displays relative line numbers
 vim.opt.relativenumber = true
 
-vim.opt.splitright = true 
+vim.opt.splitright = true
 vim.opt.splitbelow = true
 vim.opt.expandtab = true
 
@@ -25,3 +25,6 @@ vim.opt.backup = false
 vim.opt.undofile = true
 vim.opt.hlsearch = true
 vim.opt.incsearch = true
+
+-- Display a subtle vertical line at column 80
+vim.opt.colorcolumn = "80"

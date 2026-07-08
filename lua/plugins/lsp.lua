@@ -4,6 +4,7 @@ return {
     dependencies = {
       "williamboman/mason.nvim",
       "williamboman/mason-lspconfig.nvim",
+      "WhoIsSethDaniel/mason-tool-installer.nvim",
       "hrsh7th/nvim-cmp",
       "hrsh7th/cmp-nvim-lsp",
       "hrsh7th/cmp-buffer",
@@ -17,7 +18,7 @@ return {
 
       require("mason").setup()
       require("mason-lspconfig").setup({
-        ensure_installed = { "lua_ls", "ts_ls", "pylsp", "html" },
+        ensure_installed = { "lua_ls", "ts_ls", "pylsp", "html", "gopls", "rust_analyzer", "jdtls" },
         -- Modern way to register server handlers directly inside setup options:
         handlers = {
           function(server_name)
@@ -26,6 +27,19 @@ return {
             })
           end,
         }
+      })
+
+      require("mason-tool-installer").setup({
+        ensure_installed = {
+          "stylua",
+          "isort",
+          "black",
+          "prettierd",
+          "prettier",
+          "goimports",
+          "gofumpt",
+          "google-java-format",
+        },
       })
 
       -- Core LSP Navigation Keymaps
