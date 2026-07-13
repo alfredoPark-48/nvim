@@ -26,6 +26,23 @@ return {
               capabilities = capabilities,
             })
           end,
+          ["gopls"] = function()
+            lspconfig.gopls.setup({
+              capabilities = capabilities,
+              settings = {
+                gopls = {
+                  analyses = {
+                    unusedparams = true,
+                    shadow = true,
+                  },
+                  staticcheck = true,
+                  gofumpt = true,
+                  usePlaceholders = true,
+                  completeUnimported = true,
+                },
+              },
+            })
+          end,
         }
       })
 
@@ -39,6 +56,9 @@ return {
           "goimports",
           "gofumpt",
           "google-java-format",
+          "gomodifytags",
+          "impl",
+          "gotests",
         },
       })
 

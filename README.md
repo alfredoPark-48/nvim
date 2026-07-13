@@ -82,15 +82,17 @@ Your plugins are organized modularly under `lua/plugins/`. Here is what each fil
 *   **[harpoon](https://github.com/theprimeagen/harpoon)**: Fast workspace navigation that allows pinning files to specific slots and jumping to them instantly.
 *   **[undotree](https://github.com/mbbill/undotree)**: A visual branching undo-history browser to revert code state easily.
 
-### 💻 IDE & Coding features (`lua/plugins/lsp.lua`, `lua/plugins/utilities.lua`, `lua/plugins/editing.lua`)
+### 💻 IDE & Coding features (`lua/plugins/lsp.lua`, `lua/plugins/utilities.lua`, `lua/plugins/editing.lua`, `lua/plugins/gopher.lua`, `lua/plugins/treesitter.lua`)
 *   **[nvim-lspconfig](https://github.com/neovim/nvim-lspconfig)**: Native LSP configuration manager.
-*   **[mason.nvim](https://github.com/williamboman/mason.nvim)**, **[mason-lspconfig.nvim](https://github.com/williamboman/mason-lspconfig.nvim)** & **[mason-tool-installer.nvim](https://github.com/WhoIsSethDaniel/mason-tool-installer.nvim)**: Automatic installation of language servers (`lua_ls`, `ts_ls`, `pylsp`, `html`, `gopls`, `rust_analyzer`, `jdtls`) and external formatters (`stylua`, `isort`, `black`, `prettierd`, `prettier`, `goimports`, `gofumpt`, `google-java-format`).
+*   **[mason.nvim](https://github.com/williamboman/mason.nvim)**, **[mason-lspconfig.nvim](https://github.com/williamboman/mason-lspconfig.nvim)** & **[mason-tool-installer.nvim](https://github.com/WhoIsSethDaniel/mason-tool-installer.nvim)**: Automatic installation of language servers (`lua_ls`, `ts_ls`, `pylsp`, `html`, `gopls`, `rust_analyzer`, `jdtls`) and external formatters/tools (`stylua`, `isort`, `black`, `prettierd`, `prettier`, `goimports`, `gofumpt`, `google-java-format`, `gomodifytags`, `impl`, `gotests`).
 *   **[nvim-cmp](https://github.com/hrsh7th/nvim-cmp)**: The completion engine supporting LSP completions, local buffer matching, path completions, and snippets.
 *   **[LuaSnip](https://github.com/L3MON4D3/LuaSnip)**: Lightweight snippet execution engine.
 *   **[conform.nvim](https://github.com/stevearc/conform.nvim)**: Code auto-formatter triggering on file save. Supports `stylua` for Lua, `black`/`isort` for Python, `prettier`/`prettierd` for JS/TS, `goimports`/`gofumpt` for Go, `rustfmt` for Rust, and `google-java-format` for Java.
 *   **[trouble.nvim](https://github.com/folke/trouble.nvim)**: Prettified summary lists for compilation errors, LSP diagnostics, and quickfix lists.
 *   **[nvim-autopairs](https://github.com/windwp/nvim-autopairs)**: Automatically inserts closing brackets, quotes, and braces.
 *   **[Comment.nvim](https://github.com/numToStr/Comment.nvim)**: Modern commenting support.
+*   **[gopher.nvim](https://github.com/olexsmir/gopher.nvim)**: Structural helper actions for Go, supporting automated JSON and YAML tag additions.
+*   **[nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter)**: For advanced parsing and treesitter syntax grammars (managing Go, GoMod, and GoWork parsers).
 *   **Native Tree-sitter Auto-Attach**: Automatically triggers `vim.treesitter.start()` plus Tree-sitter folding and indentation when opening Java, Python, Go, Rust, and other supported buffers.
 *   **[markdown-preview.nvim](https://github.com/iamcco/markdown-preview.nvim)**: Renders live markdown pages in your browser.
 
@@ -204,3 +206,10 @@ Your Leader key is configured to `<Space>`.
 | `K` | Normal | Show hover documentation popup |
 | `<leader>vrn` | Normal | Rename all occurrences of symbol under cursor |
 | `<leader>vca` | Normal | Show available code actions |
+
+### 🐹 Go Development (Gopher)
+| Keymap | Mode | Action |
+| :--- | :---: | :--- |
+| `<leader>gsj` | Normal | Add JSON struct tags to struct under cursor |
+| `<leader>gsy` | Normal | Add YAML struct tags to struct under cursor |
+
