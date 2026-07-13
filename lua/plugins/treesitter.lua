@@ -10,7 +10,24 @@ return {
 
       -- Check and install required parsers if they are missing
       local installed = ts.get_installed()
-      local parsers = { "go", "gomod", "gowork", "lua", "markdown", "markdown_inline" }
+      local parsers = {
+        "go",
+        "gomod",
+        "gowork",
+        "lua",
+        "markdown",
+        "markdown_inline",
+        "typescript",
+        "javascript",
+        "tsx",
+        "python",
+        "html",
+        "css",
+        "json",
+        "yaml",
+        "rust",
+        "java",
+      }
       local to_install = {}
       for _, p in ipairs(parsers) do
         if not vim.list_contains(installed, p) then
