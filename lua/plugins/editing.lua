@@ -42,6 +42,10 @@ return {
 					"lua",
 					"javascript",
 					"typescript",
+					"javascriptreact",
+					"typescriptreact",
+					"html",
+					"css",
 					"json",
 					"yaml",
 					"toml",
@@ -52,6 +56,7 @@ return {
 						vim.bo[args.buf].indentexpr = "v:lua.vim.treesitter.indentexpr()"
 						vim.wo.foldmethod = "expr"
 						vim.wo.foldexpr = "v:lua.vim.treesitter.foldexpr()"
+						vim.wo.foldlevel = 99
 					end
 				end,
 			})
